@@ -79,23 +79,28 @@ function renderNiconicoCards(items, container) {
         const title = item.title;
         const link = item.link;
         
-        // 日付のフォーマット
         const dateObj = new Date(item.pubDate.replace(/ /g, 'T'));
         const dateString = dateObj.toLocaleDateString("ja-JP");
 
-        // サムネイル画像の取得
-        // rss2jsonはニコニコ動画のRSSにある <description> 内の画像タグを自動で見つけて item.thumbnail に入れてくれます
-        const thumbnailUrl = item.thumbnail || "";
+        // 元の低画質なサムネイルURL
+        const originalThumbnailUrl = item.thumbnail || "";
+        
+        // ★ 高画質版のURLを作成（末尾に .L を付け足す）
+        const highResThumbnailUrl = originalThumbnailUrl ? originalThumbnailUrl + ".L" : "";
 
         const card = document.createElement("div");
         card.className = "card";
         
         let htmlContent = "";
         
-        if (thumbnailUrl) {
+        if (highResThumbnailUrl) {
+            // ★ onerror属性を追加：高画質版(.L)の読み込みに失敗したら、自動的に元のURL(originalThumbnailUrl)を読み直す
             htmlContent += `
                 <div class="thumbnail-wrapper">
-                    <img src="${thumbnailUrl}" alt="${title}" loading="lazy">
+                    <img src="${highResThumbnailUrl}" 
+                         alt="${title}" 
+                         loading="lazy" 
+                         onerror="this.onerror=null; this.src='${originalThumbnailUrl}';">
                 </div>
             `;
         }
