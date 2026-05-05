@@ -88,8 +88,11 @@ function renderNiconicoCards(items, container) {
         // ★ 高画質版のURLを作成（末尾に .L を付け足す）
         const highResThumbnailUrl = originalThumbnailUrl ? originalThumbnailUrl + ".L" : "";
 
-        const card = document.createElement("div");
+        const card = document.createElement("a");
         card.className = "card";
+        card.href = link;
+        card.target = "_blank";
+        card.rel = "noopener noreferrer";
         
         let htmlContent = "";
         
@@ -107,7 +110,7 @@ function renderNiconicoCards(items, container) {
 
         htmlContent += `
             <div class="card-content">
-                <div class="card-title"><a href="${link}" target="_blank" rel="noopener noreferrer">${title}</a></div>
+                <div class="card-title">${title}</div>
                 <div class="card-date">${dateString}</div>
             </div>
         `;
