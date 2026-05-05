@@ -155,14 +155,18 @@ function renderYouTubeCards(items, container) {
         const thumbnails = item.snippet.thumbnails;
         const thumbnailUrl = thumbnails.medium ? thumbnails.medium.url : thumbnails.default.url;
 
-        const card = document.createElement("div");
+        const card = document.createElement("a");
         card.className = "card";
+        card.href = link;
+        card.target = "_blank";
+        card.rel = "noopener noreferrer";
+
         card.innerHTML = `
             <div class="thumbnail-wrapper">
                 <img src="${thumbnailUrl}" alt="${title}" loading="lazy">
             </div>
             <div class="card-content">
-                <div class="card-title"><a href="${link}" target="_blank" rel="noopener noreferrer">${title}</a></div>
+                <div class="card-title">${title}</div>
                 <div class="card-date">${dateString}</div>
             </div>
         `;
@@ -219,6 +223,9 @@ async function fetchBlogFeed() {
 }
 
 // ブログカードのHTML生成関数
+// ==========================================
+// ブログカードのHTML生成関数（enclosureタグ対応の最強版）
+// ==========================================
 function renderBlogCards(items, container) {
     container.innerHTML = ''; 
 
@@ -227,10 +234,40 @@ function renderBlogCards(items, container) {
         const link = item.link;
         const dateObj = new Date(item.pubDate.replace(/ /g, 'T'));
         const dateString = dateObj.toLocaleDateString("ja-JP");
-        const thumbnailUrl = item.thumbnail || "";
+        
+        let thumbnailUrl = "";
 
-        const card = document.createElement("div");
+        // <enclosure> タグから画像を取得
+        // rss2jsonは enclosure タグを item.enclosure オブジェクトに変換してくれます
+        if (item.enclosure && item.enclosure.link) {
+            // 音声ファイルなどが混ざるのを防ぐため、typeがimageから始まるかチェック
+            if (item.enclosure.type && item.enclosure.type.startsWith('image/')) {
+                thumbnailUrl = item.enclosure.link;
+            } else {
+                thumbnailUrl = item.enclosure.link; // type指定がない場合も念のため取得
+            }
+        }
+        
+        // enclosureが無ければ、rss2jsonが自動抽出したサムネイルを試す
+        if (!thumbnailUrl) {
+            thumbnailUrl = item.thumbnail || "";
+        }
+        
+        // それでも無ければ、本文(contentやdescription)から最初の<img>タグを無理やり抜き出す
+        if (!thumbnailUrl) {
+            const content = item.content || item.description || "";
+            const imgMatch = content.match(/<img[^>]+src="([^">]+)"/i);
+            if (imgMatch) {
+                thumbnailUrl = imgMatch[1];
+            }
+        }
+
+        const card = document.createElement("a");
         card.className = "card";
+        card.href = link;
+        card.target = "_blank";
+        card.rel = "noopener noreferrer";
+
         let htmlContent = "";
         
         if (thumbnailUrl) {
@@ -243,7 +280,7 @@ function renderBlogCards(items, container) {
 
         htmlContent += `
             <div class="card-content">
-                <div class="card-title"><a href="${link}" target="_blank" rel="noopener noreferrer">${title}</a></div>
+                <div class="card-title">${title}</div>
                 <div class="card-date">${dateString}</div>
             </div>
         `;
