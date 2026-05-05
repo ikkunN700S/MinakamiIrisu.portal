@@ -1,73 +1,122 @@
 // ==========================================
-// 設定：RSSフィードのURL
+// 設定：APIキーと各種URL
 // ==========================================
 const CONFIG = {
-    // YouTubeのチャンネルIDをここに入れる
-    // 例: https://www.youtube.com/feeds/videos.xml?channel_id=UC...
-    youtube: "https://www.youtube.com/feeds/videos.xml?channel_id=UCgo7fyKuK0BAW7K8U0JOs0A",
+    // 1. 取得したYouTube Data APIキーをここに入力
+    youtubeApiKey: "AIzaSyAn6dhEzUFUJfh3D6d3N-61cG2njf2z2ak",
+    
+    // 水上イリスさんのチャンネルID
+    youtubeChannelId: "UCgo7fyKuK0BAW7K8U0JOs0A",
     
     // ブログのRSS
-    blog: "https://minakamiirisu.wixsite.com/minakamiirisu/blog-feed.xml"
+    blogRss: "https://minakamiirisu.wixsite.com/minakamiirisu/blog-feed.xml"
 };
 
-const PROXY_URL = 'https://api.allorigins.win/raw?url=';
+// RSS2JSONのAPI URL (ブログ用)
+const RSS2JSON_URL = 'https://api.rss2json.com/v1/api.json?rss_url=';
 
 document.addEventListener('DOMContentLoaded', () => {
-    // 両方のフィードを取得
-    fetchFeed(CONFIG.youtube, 'youtube-feed', true);
-    fetchFeed(CONFIG.blog, 'blog-feed', false);
+    fetchYouTubeWithAPI();
+    fetchBlogFeed();
 });
 
-async function fetchFeed(url, containerId, isYouTube) {
-    const container = document.getElementById(containerId);
+// --------------------------------------------------
+// YouTubeの取得 (YouTube Data API v3 を使用)
+// --------------------------------------------------
+async function fetchYouTubeWithAPI() {
+    const container = document.getElementById('youtube-feed');
+
+    if (CONFIG.youtubeApiKey.includes("ここに")) {
+        container.innerHTML = '<p style="color: #ffaa00; padding: 1rem;">YouTube APIキーが設定されていません。</p>';
+        return;
+    }
+
+    // YouTube APIのURL (最新の動画を5件取得する設定)
+    const apiUrl = `https://www.googleapis.com/youtube/v3/search?key=${CONFIG.youtubeApiKey}&channelId=${CONFIG.youtubeChannelId}&part=snippet,id&order=date&maxResults=5`;
 
     try {
-        const response = await fetch(PROXY_URL + encodeURIComponent(url));
-        const xmlText = await response.text();
-        const parser = new DOMParser();
-        const xmlDoc = parser.parseFromString(xmlText, "text/xml");
+        const response = await fetch(apiUrl);
+        const data = await response.json();
 
-        // YouTube(Atom)ならentry、ブログ(RSS2.0)ならitemを取得
-        const items = isYouTube ? xmlDoc.querySelectorAll("entry") : xmlDoc.querySelectorAll("item");
-        
-        if (items.length === 0) {
-            container.innerHTML = '<p class="loading">記事が見つかりませんでした。</p>';
+        // エラーチェック（APIキー間違いや制限オーバーなど）
+        if (data.error) {
+            throw new Error(data.error.message);
+        }
+
+        if (!data.items || data.items.length === 0) {
+            container.innerHTML = '<p class="loading">動画が見つかりませんでした。</p>';
             return;
         }
 
         container.innerHTML = ''; // ローディング消去
 
-        items.forEach(item => {
-            const title = item.querySelector("title").textContent;
+        data.items.forEach(item => {
+            // チャンネルや再生リストではなく「動画」だけをフィルタリング
+            if (item.id.kind !== "youtube#video") return;
+
+            const videoId = item.id.videoId;
+            const title = item.snippet.title;
+            const link = `https://www.youtube.com/watch?v=${videoId}`;
             
-            // リンクの取得
-            let link = "";
-            if (isYouTube) {
-                link = item.querySelector("link").getAttribute("href");
-            } else {
-                link = item.querySelector("link").textContent;
-            }
+            // 日付のフォーマット
+            const dateObj = new Date(item.snippet.publishedAt);
+            const dateString = dateObj.toLocaleDateString("ja-JP");
 
-            // 日付
-            const dateTag = item.querySelector("published") || item.querySelector("pubDate") || item.querySelector("updated");
-            const date = new Date(dateTag.textContent).toLocaleDateString("ja-JP");
+            // サムネイル (mediumサイズを指定)
+            const thumbnailUrl = item.snippet.thumbnails.medium.url;
 
-            // サムネイルの取得 (YouTube用)
-            let thumbnailUrl = "";
-            if (isYouTube) {
-                // media:thumbnail などのネームスペース付きタグを取得
-                const mediaThumbnail = item.getElementsByTagName("media:thumbnail")[0];
-                thumbnailUrl = mediaThumbnail ? mediaThumbnail.getAttribute("url") : "";
-            }
-
-            // カードHTMLの組み立て
+            // HTML生成
             const card = document.createElement("div");
             card.className = "card";
-            
+            card.innerHTML = `
+                <div class="thumbnail-wrapper">
+                    <img src="${thumbnailUrl}" alt="${title}" loading="lazy">
+                </div>
+                <div class="card-content">
+                    <div class="card-title"><a href="${link}" target="_blank" rel="noopener noreferrer">${title}</a></div>
+                    <div class="card-date">${dateString}</div>
+                </div>
+            `;
+            container.appendChild(card);
+        });
+
+    } catch (error) {
+        console.error("YouTube API取得エラー:", error);
+        container.innerHTML = '<p class="loading">YouTubeの取得に失敗しました。</p>';
+    }
+}
+
+// --------------------------------------------------
+// ブログの取得 (rss2jsonを使用)
+// --------------------------------------------------
+async function fetchBlogFeed() {
+    const container = document.getElementById('blog-feed');
+
+    if (CONFIG.blogRss.includes("ここに")) return;
+
+    try {
+        const response = await fetch(RSS2JSON_URL + encodeURIComponent(CONFIG.blogRss));
+        const data = await response.json();
+
+        if (data.status !== "ok" || !data.items || data.items.length === 0) {
+            container.innerHTML = '<p class="loading">ブログ記事が見つかりませんでした。</p>';
+            return;
+        }
+
+        container.innerHTML = ''; 
+
+        data.items.forEach(item => {
+            const title = item.title;
+            const link = item.link;
+            const dateObj = new Date(item.pubDate.replace(/ /g, 'T'));
+            const dateString = dateObj.toLocaleDateString("ja-JP");
+            const thumbnailUrl = item.thumbnail || "";
+
+            const card = document.createElement("div");
+            card.className = "card";
             let htmlContent = "";
             
-            // YouTubeの場合はサムネイルを表示
-            if (isYouTube && thumbnailUrl) {
+            if (thumbnailUrl) {
                 htmlContent += `
                     <div class="thumbnail-wrapper">
                         <img src="${thumbnailUrl}" alt="${title}" loading="lazy">
@@ -77,8 +126,8 @@ async function fetchFeed(url, containerId, isYouTube) {
 
             htmlContent += `
                 <div class="card-content">
-                    <div class="card-title"><a href="${link}" target="_blank">${title}</a></div>
-                    <div class="card-date">${date}</div>
+                    <div class="card-title"><a href="${link}" target="_blank" rel="noopener noreferrer">${title}</a></div>
+                    <div class="card-date">${dateString}</div>
                 </div>
             `;
 
@@ -87,7 +136,7 @@ async function fetchFeed(url, containerId, isYouTube) {
         });
 
     } catch (error) {
-        console.error(error);
-        container.innerHTML = '<p class="loading">エラーが発生しました。</p>';
+        console.error("ブログ取得エラー:", error);
+        container.innerHTML = '<p class="loading">ブログの取得に失敗しました。</p>';
     }
 }
