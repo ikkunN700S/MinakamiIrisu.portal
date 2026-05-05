@@ -2,16 +2,16 @@
 // 設定：APIキーと各種URL、キャッシュ時間
 // ==========================================
 const CONFIG = {
-    // 1. YouTube Data APIキー
+    // YouTube Data APIキー
     youtubeApiKey: "AIzaSyAn6dhEzUFUJfh3D6d3N-61cG2njf2z2ak",
     
-    // 2. チャンネルID
     youtubeChannelId: "UCgo7fyKuK0BAW7K8U0JOs0A",
+
+    targetPlaylistId: "PLA_WYr2yKMahzDw7253eRa4HxqFdJKfIw",
     
-    // 3. ブログのRSS
     blogRss: "https://minakamiirisu.wixsite.com/minakamiirisu/blog-feed.xml",
 
-    // 4. キャッシュの有効期限（ミリ秒）: 現在は1時間（60分 × 60秒 × 1000）
+    // キャッシュの有効期限（ミリ秒）: 現在は1時間（60分 × 60秒 × 1000）
     cacheDuration: 60 * 60 * 1000 
 };
 
@@ -19,6 +19,7 @@ const RSS2JSON_URL = 'https://api.rss2json.com/v1/api.json?rss_url=';
 
 document.addEventListener('DOMContentLoaded', () => {
     fetchYouTubeWithAPI();
+    fetchSpecificPlaylist();
     fetchBlogFeed();
 });
 
@@ -80,6 +81,59 @@ async function fetchYouTubeWithAPI() {
             renderYouTubeCards(JSON.parse(cachedData), container);
         } else {
             container.innerHTML = '<p class="loading">YouTubeの取得に失敗しました。</p>';
+        }
+    }
+}
+
+// --------------------------------------------------
+// 指定プレイリストの取得 ＆ キャッシュ機能
+// --------------------------------------------------
+async function fetchSpecificPlaylist() {
+    const container = document.getElementById('playlist-feed');
+
+    if (CONFIG.targetPlaylistId.includes("ここに")) return; // 設定されていない場合は何もしない
+
+    // キャッシュの確認（最新動画とは別の名前で保存します）
+    const cacheKey = 'specific_playlist_cache';
+    const cacheTimeKey = 'specific_playlist_time';
+    const cachedData = localStorage.getItem(cacheKey);
+    const cachedTime = localStorage.getItem(cacheTimeKey);
+    const now = new Date().getTime();
+
+    if (cachedData && cachedTime && (now - parseInt(cachedTime)) < CONFIG.cacheDuration) {
+        console.log("Playlist: キャッシュからデータを読み込みました");
+        renderYouTubeCards(JSON.parse(cachedData), container);
+        return;
+    }
+
+    // プレイリストIDをそのまま使用 (1回1ポイント消費)
+    const apiUrl = `https://www.googleapis.com/youtube/v3/playlistItems?key=${CONFIG.youtubeApiKey}&playlistId=${CONFIG.targetPlaylistId}&part=snippet&maxResults=5`;
+
+    try {
+        console.log("Playlist: 新しいデータをAPIから取得しています...");
+        const response = await fetch(apiUrl);
+        const data = await response.json();
+
+        if (data.error) throw new Error(data.error.message);
+
+        if (!data.items || data.items.length === 0) {
+            container.innerHTML = '<p class="loading">プレイリストの動画が見つかりませんでした。</p>';
+            return;
+        }
+
+        // データの保存
+        localStorage.setItem(cacheKey, JSON.stringify(data.items));
+        localStorage.setItem(cacheTimeKey, now.toString());
+
+        // 描画 (既存のYouTubeカード生成関数をそのまま使い回します！)
+        renderYouTubeCards(data.items, container);
+
+    } catch (error) {
+        console.error("プレイリスト取得エラー:", error);
+        if (cachedData) {
+            renderYouTubeCards(JSON.parse(cachedData), container);
+        } else {
+            container.innerHTML = '<p class="loading">プレイリストの取得に失敗しました。</p>';
         }
     }
 }
