@@ -52,7 +52,7 @@ async function fetchYouTubeWithAPI() {
     const uploadPlaylistId = CONFIG.youtubeChannelId.replace(/^UC/, 'UU');
     
     // playlistItems エンドポイントを使用 (1回1ポイント消費)
-    const apiUrl = `https://www.googleapis.com/youtube/v3/playlistItems?key=${CONFIG.youtubeApiKey}&playlistId=${uploadPlaylistId}&part=snippet&maxResults=5`;
+    const apiUrl = `https://www.googleapis.com/youtube/v3/playlistItems?key=${CONFIG.youtubeApiKey}&playlistId=${uploadPlaylistId}&part=snippet&maxResults=10`;
 
     try {
         console.log("YouTube: 新しいデータをAPIから取得しています...");
@@ -107,7 +107,7 @@ async function fetchSpecificPlaylist() {
     }
 
     // プレイリストIDをそのまま使用 (1回1ポイント消費)
-    const apiUrl = `https://www.googleapis.com/youtube/v3/playlistItems?key=${CONFIG.youtubeApiKey}&playlistId=${CONFIG.targetPlaylistId}&part=snippet&maxResults=5`;
+    const apiUrl = `https://www.googleapis.com/youtube/v3/playlistItems?key=${CONFIG.youtubeApiKey}&playlistId=${CONFIG.targetPlaylistId}&part=snippet&maxResults=10`;
 
     try {
         console.log("Playlist: 新しいデータをAPIから取得しています...");
