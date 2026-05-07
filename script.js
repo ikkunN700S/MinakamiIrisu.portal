@@ -102,7 +102,7 @@ async function fetchSpecificPlaylist() {
 
     if (cachedData && cachedTime && (now - parseInt(cachedTime)) < CONFIG.cacheDuration) {
         console.log("Playlist: キャッシュからデータを読み込みました");
-        renderYouTubeCards(JSON.parse(cachedData), container);
+        renderPlaylistCards(JSON.parse(cachedData), container);
         return;
     }
 
@@ -126,12 +126,12 @@ async function fetchSpecificPlaylist() {
         localStorage.setItem(cacheTimeKey, now.toString());
 
         // 描画 (既存のYouTubeカード生成関数をそのまま使い回します！)
-        renderYouTubeCards(data.items, container);
+        renderPlaylistCards(data.items, container);
 
     } catch (error) {
         console.error("プレイリスト取得エラー:", error);
         if (cachedData) {
-            renderYouTubeCards(JSON.parse(cachedData), container);
+            renderPlaylistCards(JSON.parse(cachedData), container);
         } else {
             container.innerHTML = '<p class="loading">プレイリストの取得に失敗しました。</p>';
         }
@@ -168,6 +168,41 @@ function renderYouTubeCards(items, container) {
             <div class="card-content">
                 <div class="card-title">${title}</div>
                 <div class="card-date">${dateString}</div>
+            </div>
+        `;
+        container.appendChild(card);
+    });
+}
+
+// YouTubeプレイリストカードのHTML生成関数
+function renderPlaylistCards(items, container) {
+    container.innerHTML = ''; // ローディング消去
+
+    items.forEach(item => {
+        // playlistItems の場合、動画IDの場所が少し変わります
+        const videoId = item.snippet.resourceId.videoId;
+        const title = item.snippet.title;
+        const link = `https://www.youtube.com/watch?v=${videoId}`;
+        
+        const dateObj = new Date(item.snippet.publishedAt);
+        const dateString = dateObj.toLocaleDateString("ja-JP");
+
+        // サムネイル (解像度が用意されていない場合のエラーを防ぐため medium が無ければ default を使用)
+        const thumbnails = item.snippet.thumbnails;
+        const thumbnailUrl = thumbnails.medium ? thumbnails.medium.url : thumbnails.default.url;
+
+        const card = document.createElement("a");
+        card.className = "card";
+        card.href = link;
+        card.target = "_blank";
+        card.rel = "noopener noreferrer";
+
+        card.innerHTML = `
+            <div class="thumbnail-wrapper">
+                <img src="${thumbnailUrl}" alt="${title}" loading="lazy">
+            </div>
+            <div class="card-content">
+                <div class="card-title">${title}</div>
             </div>
         `;
         container.appendChild(card);
@@ -222,9 +257,8 @@ async function fetchBlogFeed() {
     }
 }
 
-// ブログカードのHTML生成関数
 // ==========================================
-// ブログカードのHTML生成関数（enclosureタグ対応の最強版）
+// ブログカードのHTML生成関数（enclosureタグ対応）
 // ==========================================
 function renderBlogCards(items, container) {
     container.innerHTML = ''; 
