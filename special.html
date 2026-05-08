@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Special Contents</title>
+    <link rel="stylesheet" href="./css/special.css">
+    <!-- Google Fonts の読み込み -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div id="app">
+        <!-- JSで動的にヘッダーが生成されます -->
+        <header id="site-header" class="site-header"></header>
+
+        <!-- JSで動的にコンテンツグリッドが生成されます -->
+        <main class="container">
+            <div id="contents-grid" class="contents-grid">
+                <!-- コンテンツカードがここに挿入されます -->
+            </div>
+        </main>
+    </div>
+
+
+    <footer class="site-footer">
+        <p>&copy; 2026 水上イリス / ICCHAMA.</p>
+        <p id="site-version"></p>
+    </footer>
+    
+    <script src="./js/special.js" defer></script>
+    <script src="./js/version.js"></script>
+</body>
+</html>

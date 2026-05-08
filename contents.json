@@ -1,0 +1,36 @@
+{
+  "meta": {
+    "title": "SPECIAL CONTENTS",
+    "subtitle": "水上イリス / ICCHAMA Official",
+    "description": "最新の楽曲のoff vocal音源などの配布・特設ページです。"
+  },
+  "contents": [
+    {
+      "id": "001",
+      "category": "MUSIC",
+      "title": "XXX",
+      "description": "off vocal音源の配布。",
+      "imageUrl": "./images/xxx.jpg",
+      "linkUrl": "#",
+      "date": "20xx.xx.xx"
+    },
+    {
+      "id": "002",
+      "category": "???",
+      "title": "YYY",
+      "description": "???。",
+      "imageUrl": "./images/yyy.jpg",
+      "linkUrl": "#",
+      "date": "20xx.xx.xx"
+    },
+    {
+      "id": "003",
+      "category": "NO DATA",
+      "title": "ZZZ",
+      "description": "ｳｨｲｲｲｲｲ。",
+      "imageUrl": "./images/zzz.jpg",
+      "linkUrl": "#",
+      "date": "20xx.xx.xx"
+    }
+  ]
+}

@@ -1,4 +1,4 @@
-fetch('/MinakamiIrisu.portal/version.json?v=' + new Date().getTime())
+fetch('./version.json?v=' + new Date().getTime())
   .then(res => res.json())
   .then(data => {
     const el = document.getElementById('site-version');
