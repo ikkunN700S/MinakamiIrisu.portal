@@ -8,29 +8,29 @@
     {
       "id": "001",
       "category": "MUSIC",
-      "title": "New Single 'Cybernetic Mirage'",
-      "description": "最新ボーカロイド楽曲のハイレゾ音源およびステムデータの配布。",
-      "imageUrl": "./images/contents/track1.jpg",
+      "title": "XXX",
+      "description": "off vocal音源の配布。",
+      "imageUrl": "./images/xxx.jpg",
       "linkUrl": "#",
-      "date": "2026.05.15"
+      "date": "20xx.xx.xx"
     },
     {
       "id": "002",
-      "category": "REMIX",
-      "title": "Nightcore & Sped Up Pack Vol.1",
-      "description": "過去リリース楽曲のSped Upアレンジパック。BGM利用などのガイドラインもこちらから。",
-      "imageUrl": "./images/contents/remix_pack.jpg",
+      "category": "???",
+      "title": "YYY",
+      "description": "???。",
+      "imageUrl": "./images/yyy.jpg",
       "linkUrl": "#",
-      "date": "2026.04.28"
+      "date": "20xx.xx.xx"
     },
     {
       "id": "003",
-      "category": "TOOL",
-      "title": "MV Particle Generator",
-      "description": "ブラウザ上で動作する音楽映像向けのパーティクル・エフェクト生成ツール。",
-      "imageUrl": "./images/contents/visual_tool.png",
+      "category": "NO DATA",
+      "title": "ZZZ",
+      "description": "ｳｨｲｲｲｲｲ。",
+      "imageUrl": "./images/zzz.jpg",
       "linkUrl": "#",
-      "date": "2026.05.01"
+      "date": "20xx.xx.xx"
     }
   ]
 }
