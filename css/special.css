@@ -5,7 +5,7 @@
     --accent-color: #00e5ff;
     --card-bg: #1a1a1a;
     --font-en: 'Montserrat', sans-serif;
-    --font-jp: 'Noto Sans JP', sans-serif;
+    --font-jp: "Helvetica Neue", Arial, sans-serif;
 }
 
 * {
@@ -18,42 +18,57 @@ body {
     background-color: var(--bg-color);
     color: var(--text-main);
     font-family: var(--font-jp);
-    line-height: 1.6;
+    line-height: 1.4;
     -webkit-font-smoothing: antialiased;
+}
+
+header {
+    background: linear-gradient(to right, #399ec2, #256b84);
+    margin-bottom: 2rem;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+}
+
+.header-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 2rem 1rem;
+    display: flex;
+    justify-content: center; /* タイトルを中央寄せ */
+    align-items: center;
+    position: relative; /* アイコンを絶対配置するための基準 */
+}
+
+.header-titles {
+    text-align: center;
+}
+
+/* SNSアイコンのコンテナ */
+.header-socials {
+    position: absolute;
+    right: 2rem; /* 右端に配置 */
+    display: flex;
+    gap: 1.2rem; /* アイコン同士の隙間 */
+}
+
+/* SNSアイコンのデザイン */
+.header-socials a {
+    color: #ffffff;
+    font-size: 1.5rem; /* アイコンの大きさ */
+    text-decoration: none;
+    transition: transform 0.2s, opacity 0.2s;
+    opacity: 0.9;
+}
+
+/* マウスを乗せた時の動き（少し大きくなって光る） */
+.header-socials a:hover {
+    transform: translateY(-3px) scale(1.1);
+    opacity: 1;
 }
 
 .container {
     max-width: 1200px;
     margin: 0 auto;
     padding: 0 20px;
-}
-
-/* Header */
-.site-header {
-    text-align: center;
-    padding: 80px 20px 60px;
-}
-
-.site-title {
-    font-family: var(--font-en);
-    font-size: 3rem;
-    font-weight: 900;
-    letter-spacing: 0.1em;
-    margin-bottom: 10px;
-}
-
-.site-subtitle {
-    font-family: var(--font-en);
-    color: var(--accent-color);
-    font-size: 1rem;
-    font-weight: 700;
-    letter-spacing: 0.05em;
-    margin-bottom: 20px;
-}
-
-.site-description {
-    color: var(--text-muted);
-    font-size: 0.95rem;
 }
 
 /* Grid Layout */
@@ -167,8 +182,16 @@ footer #site-version {
     color: #aaa;
 }
 
-/* レスポンシブ対応 */
-@media (max-width: 768px) {
+/* スマホ用の調整（画面幅が600px以下の場合） */
+@media (max-width: 600px) {
+    .header-content {
+        flex-direction: column; /* 縦並びに変更 */
+        gap: 1.5rem;
+    }
+    .header-socials {
+        position: static; /* 右端固定を解除し、タイトルの下に配置 */
+        justify-content: center;
+    }
     .site-title { font-size: 2rem; }
     .contents-grid { gap: 20px; }
 }

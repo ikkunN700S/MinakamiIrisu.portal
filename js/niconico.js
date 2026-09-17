@@ -2,15 +2,15 @@
 // ニコニコ動画専用の設定
 // ==========================================
 const NICO_CONFIG = {
-    // 取得したいニコニコ動画のRSS URL（末尾の ?rss=2.0 が重要です）
-    rssUrl: "https://www.nicovideo.jp/user/134003161/video?rss=2.0",
+    // ユーザーIDを指定
+    userId: "134003161",
     
     // キャッシュの有効期限（1時間）
     cacheDuration: 60 * 60 * 1000 
 };
 
-// RSS2JSON API (ニコニコ動画もこれでCORS回避＆JSON化します)
-const NICO_RSS2JSON_URL = 'https://api.rss2json.com/v1/api.json?rss_url=';
+// CORS回避のためのプロキシURL（API v2へのリクエスト用）
+const PROXY_URL = 'https://api.allorigins.win/raw?url=';
 
 // HTMLの読み込みが完了したら実行
 document.addEventListener('DOMContentLoaded', () => {
@@ -18,13 +18,13 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // --------------------------------------------------
-// ニコニコ動画RSSの取得処理
+// ニコニコ動画の取得処理 (スナップショット検索API v2)
 // --------------------------------------------------
 async function fetchNiconicoFeed() {
     const container = document.getElementById('niconico-feed');
 
-    if (NICO_CONFIG.rssUrl.includes("ここに")) {
-        container.innerHTML = '<p style="color: #ffaa00; padding: 1rem;">niconico.js でRSSのURLを設定してください。</p>';
+    if (!NICO_CONFIG.userId || NICO_CONFIG.userId.includes("ここに")) {
+        container.innerHTML = '<p style="color: #ffaa00; padding: 1rem;">niconico.js でユーザーIDを設定してください。</p>';
         return;
     }
 
@@ -43,21 +43,28 @@ async function fetchNiconicoFeed() {
 
     try {
         console.log("Niconico: 新しいデータを取得しています...");
-        // APIを叩いてニコニコのRSSをJSONで受け取る
-        const response = await fetch(NICO_RSS2JSON_URL + encodeURIComponent(NICO_CONFIG.rssUrl));
+        
+        // API v2のURLを構築（ユーザーIDで絞り込み、投稿日時順に10件取得）
+        const apiUrl = `https://snapshot.search.nicovideo.jp/api/v2/snapshot/video/contents/search?q=&targets=title&fields=contentId,title,startTime,thumbnailUrl&filters[userId][0]=${NICO_CONFIG.userId}&_sort=-startTime&_limit=10`;
+
+        const PROXY_URL = 'https://corsproxy.io/?';
+        
+        // プロキシ経由で取得（URLをエンコードして繋げる）
+        const response = await fetch(PROXY_URL + encodeURIComponent(apiUrl));
         const data = await response.json();
 
-        if (data.status !== "ok" || !data.items || data.items.length === 0) {
+        // APIレスポンスの形式に合わせたチェック（API v2は data.data の中に配列が入る）
+        if (!data || !data.data || data.data.length === 0) {
             container.innerHTML = '<p class="loading">ニコニコ動画の投稿が見つかりませんでした。</p>';
             return;
         }
 
         // データの保存
-        localStorage.setItem(cacheKey, JSON.stringify(data.items));
+        localStorage.setItem(cacheKey, JSON.stringify(data.data));
         localStorage.setItem(cacheTimeKey, now.toString());
 
         // 描画
-        renderNiconicoCards(data.items, container);
+        renderNiconicoCards(data.data, container);
 
     } catch (error) {
         console.error("ニコニコ動画取得エラー:", error);
@@ -77,15 +84,18 @@ function renderNiconicoCards(items, container) {
 
     items.forEach(item => {
         const title = item.title;
-        const link = item.link;
         
-        const dateObj = new Date(item.pubDate.replace(/ /g, 'T'));
+        // API v2の contentIdを使って動画リンクを生成
+        const link = `https://www.nicovideo.jp/watch/${item.contentId}`;
+        
+        // API v2の startTime (ISO 8601形式) をDateオブジェクトに変換
+        const dateObj = new Date(item.startTime);
         const dateString = dateObj.toLocaleDateString("ja-JP");
 
-        // 元の低画質なサムネイルURL
-        const originalThumbnailUrl = item.thumbnail || "";
+        // API v2の thumbnailUrl を使用
+        const originalThumbnailUrl = item.thumbnailUrl || "";
         
-        // ★ 高画質版のURLを作成（末尾に .L を付け足す）
+        // 高画質版のURLを作成（末尾に .L を付け足す）
         const highResThumbnailUrl = originalThumbnailUrl ? originalThumbnailUrl + ".L" : "";
 
         const card = document.createElement("a");
@@ -97,7 +107,7 @@ function renderNiconicoCards(items, container) {
         let htmlContent = "";
         
         if (highResThumbnailUrl) {
-            // ★ onerror属性を追加：高画質版(.L)の読み込みに失敗したら、自動的に元のURL(originalThumbnailUrl)を読み直す
+            // onerror属性によるフォールバック
             htmlContent += `
                 <div class="thumbnail-wrapper">
                     <img src="${highResThumbnailUrl}" 

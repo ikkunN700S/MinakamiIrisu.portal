@@ -3,18 +3,39 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Special Contents</title>
+    <link rel="icon" href="images/favicon/favicon.ico">
+    <link rel="apple-touch-icon" sizes="180x180" href="images/favicon/apple-touch-icon-180x180.png">
+    <link rel="icon" type="image/png" sizes="256x256" href="images/favicon/android-chrome-256x256.png">
+    <title>Minakami RECORDS Portal</title>
     <link rel="stylesheet" href="./css/special.css">
-    <!-- Google Fonts の読み込み -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700;900&family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 </head>
 <body>
-    <div id="app">
-        <!-- JSで動的にヘッダーが生成されます -->
-        <header id="site-header" class="site-header"></header>
+    <header>
+        <div class="header-content">
+            <div class="header-titles">
+                <h1>Minakami RECORDS Portal</h1>
+                <p>音源配布・規約リンク集</p>
+            </div>
+            
+            <div class="header-socials">
+                <!-- X (旧Twitter) -->
+                <a href="https://x.com/MinakamiIrisu_i" target="_blank" rel="noopener noreferrer" title="X (Twitter)">
+                    <i class="fa-brands fa-x-twitter"></i>
+                </a>
+                <!-- YouTube -->
+                <a href="https://www.youtube.com/@MinakamiIrisu" target="_blank" rel="noopener noreferrer" title="YouTube">
+                    <i class="fa-brands fa-youtube"></i>
+                </a>
+                <!-- 公式サイト (地球儀アイコン) -->
+                <a href="https://minakamiirisu.wixsite.com/minakamiirisu" target="_blank" rel="noopener noreferrer" title="Official Website">
+                    <i class="fa-solid fa-globe"></i>
+                </a>
+            </div>
+        </div>
+    </header>
 
+    <div id="app">
         <!-- JSで動的にコンテンツグリッドが生成されます -->
         <main class="container">
             <div id="contents-grid" class="contents-grid">
@@ -25,7 +46,7 @@
 
 
     <footer class="site-footer">
-        <p>&copy; 2026 水上イリス / ICCHAMA.</p>
+        <p>&copy; 2026 Minakami RECORDS</p>
         <p id="site-version"></p>
     </footer>
     
