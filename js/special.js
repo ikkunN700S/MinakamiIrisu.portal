@@ -11,7 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
             return response.json();
         })
         .then(data => {
-            renderHeader(data.meta);
+            // ヘッダー生成を削除し、コンテンツの描画のみ実行
             renderContents(data.contents);
         })
         .catch(error => {
@@ -20,22 +20,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 '<p style="color: red;">コンテンツの読み込みに失敗しました。</p>';
         });
 });
-
-/**
- * ヘッダー情報を描画する関数
- */
-function renderHeader(meta) {
-    const headerEl = document.getElementById('site-header');
-    
-    headerEl.innerHTML = `
-        <h1 class="site-title">${meta.title}</h1>
-        <h2 class="site-subtitle">${meta.subtitle}</h2>
-        <p class="site-description">${meta.description}</p>
-    `;
-    
-    // ページのtitleタグも書き換え
-    document.title = `${meta.title} | ${meta.subtitle}`;
-}
 
 /**
  * コンテンツグリッドを描画する関数
@@ -49,7 +33,14 @@ function renderContents(contents) {
         const card = document.createElement('a');
         card.href = item.linkUrl;
         card.className = 'content-card';
-        card.target = item.linkUrl.startsWith('http') ? '_blank' : '_self';
+        
+        // httpから始まる外部リンクの場合は別タブで開き、noopener noreferrerを付与する
+        if (item.linkUrl.startsWith('http')) {
+            card.target = '_blank';
+            card.rel = 'noopener noreferrer';
+        } else {
+            card.target = '_self';
+        }
 
         // 内部HTMLの構築
         card.innerHTML = `

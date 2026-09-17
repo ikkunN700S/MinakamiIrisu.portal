@@ -47,8 +47,10 @@ async function fetchNiconicoFeed() {
         // API v2のURLを構築（ユーザーIDで絞り込み、投稿日時順に10件取得）
         const apiUrl = `https://snapshot.search.nicovideo.jp/api/v2/snapshot/video/contents/search?q=&targets=title&fields=contentId,title,startTime,thumbnailUrl&filters[userId][0]=${NICO_CONFIG.userId}&_sort=-startTime&_limit=10`;
 
-        // APIを叩く
-        const response = await fetch(apiUrl);
+        const PROXY_URL = 'https://corsproxy.io/?';
+        
+        // プロキシ経由で取得（URLをエンコードして繋げる）
+        const response = await fetch(PROXY_URL + encodeURIComponent(apiUrl));
         const data = await response.json();
 
         // APIレスポンスの形式に合わせたチェック（API v2は data.data の中に配列が入る）
