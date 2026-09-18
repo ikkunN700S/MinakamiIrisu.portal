@@ -191,7 +191,7 @@ footer #site-version {
 }
 
 /* スマホ用の調整（画面幅が600px以下の場合） */
-@media (max-width: 600px) {
+@media (max-width: 750px) {
     .header-content {
         flex-direction: column; /* 縦並びに変更 */
         gap: 1.5rem;
