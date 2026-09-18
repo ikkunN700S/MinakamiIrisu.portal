@@ -1,0 +1,33 @@
+name: Update Niconico Data
+
+on:
+  schedule:
+    # 毎日UTCの23:00（日本時間の朝8:00）に実行
+    - cron: '0 23 * * *'
+  workflow_dispatch: # GitHubの画面から手動で実行できるボタンも有効化
+
+permissions:
+  contents: write
+
+jobs:
+  update-data:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Fetch API and generate JSON
+        run: node fetch-niconico.js
+
+      - name: Commit and Push changes
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add niconico.json
+          # niconico.json に差分がある場合のみコミットしてプッシュする
+          git diff --quiet && git diff --staged --quiet || (git commit -m "Auto-update niconico.json" && git push)
